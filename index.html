@@ -1,0 +1,759 @@
+html
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>365 Days Savings Challenge</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0a0f1d',
+                        cardbg: '#111827',
+                        cardhover: '#1f2937',
+                        accent: '#6366f1',
+                        accenthover: '#4f46e5'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: rgba(31, 41, 55, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0f1d; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+    </style>
+</head>
+<body class="bg-darkbg text-gray-100 min-h-screen flex flex-col justify-between selection:bg-accent selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="glass sticky top-0 z-40 px-4 py-3 sm:px-8 flex items-center justify-between shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid fa-piggy-bank text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">365 Days Wealth Builder</h1>
+                <p class="text-xs text-gray-400">Total Potential: <span class="text-emerald-400 font-semibold">₹66,795</span></p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <button onclick="openSyncModal()" class="px-3 py-2 sm:px-4 sm:py-2 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs sm:text-sm font-medium transition flex items-center space-x-2 shadow-sm">
+                <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
+                <span class="hidden sm:inline">GitHub Sync</span>
+            </button>
+            <button onclick="openSettingsModal()" class="px-3 py-2 sm:px-4 sm:py-2 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs sm:text-sm font-medium transition flex items-center space-x-2 shadow-sm">
+                <i class="fa-solid fa-gear text-gray-300"></i>
+                <span class="hidden sm:inline">Settings</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+        <!-- Progress Stats Banner -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Card 1: Saved So Far -->
+            <div class="glass-card p-5 rounded-2xl relative overflow-hidden shadow-xl flex flex-col justify-between">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-emerald-500 text-7xl"><i class="fa-solid fa-wallet"></i></div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Saved So Far</p>
+                    <h3 id="statSaved" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1">₹0</h3>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-xs text-gray-400">
+                    <span>Target: ₹66,795</span>
+                    <span id="statPercentage" class="text-emerald-400 font-semibold">0%</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Days Completed -->
+            <div class="glass-card p-5 rounded-2xl relative overflow-hidden shadow-xl flex flex-col justify-between">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-indigo-500 text-7xl"><i class="fa-solid fa-calendar-check"></i></div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Days Completed</p>
+                    <h3 id="statDays" class="text-2xl sm:text-3xl font-extrabold text-indigo-400 mt-1">0 / 365</h3>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-gray-400">
+                    <span id="currentStreakText">Streak: 0 days</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Transfer Rule -->
+            <div class="glass-card p-5 rounded-2xl relative overflow-hidden shadow-xl flex flex-col justify-between">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-blue-500 text-7xl"><i class="fa-solid fa-exchange-alt"></i></div>
+                <div>
+                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Transfer Rule</p>
+                    <div class="mt-1 flex items-center space-x-2 text-sm font-semibold truncate">
+                        <span id="displaySourceBank" class="px-2 py-0.5 bg-gray-800 text-blue-300 rounded border border-gray-700 truncate max-w-[100px]">Bank A</span>
+                        <i class="fa-solid fa-arrow-right text-gray-500 text-xs"></i>
+                        <span id="displayTargetBank" class="px-2 py-0.5 bg-gray-800 text-emerald-300 rounded border border-gray-700 truncate max-w-[100px]">Bank B</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-xs text-gray-400">
+                    Start Date: <span id="displayStartDate" class="text-gray-200">2026-01-01</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Total Action Button Card -->
+            <div class="glass-card p-5 rounded-2xl relative overflow-hidden shadow-xl flex flex-col justify-center items-center bg-gradient-to-br from-indigo-900/40 to-violet-900/40 border-indigo-500/30">
+                <button onclick="openTotalModal()" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Calculate Total Up To...</span>
+                </button>
+                <p class="text-[11px] text-gray-400 mt-2 text-center">Inspect milestone breakdowns & date filters</p>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="glass p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                <span class="text-xs font-semibold text-gray-400 uppercase">Filter:</span>
+                <select id="filterStatus" onchange="renderDaysList()" class="bg-gray-800 border border-gray-700 text-gray-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-indigo-500">
+                    <option value="all">All 365 Days</option>
+                    <option value="completed">Completed Only</option>
+                    <option value="pending">Pending Only</option>
+                </select>
+            </div>
+            <div class="relative w-full sm:w-72">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                    <i class="fa-solid fa-search text-xs"></i>
+                </span>
+                <input type="text" id="searchDay" oninput="renderDaysList()" placeholder="Search day number or date..." class="w-full bg-gray-800 border border-gray-700 text-xs rounded-xl pl-9 pr-4 py-2 text-gray-200 placeholder-gray-500 outline-none focus:border-indigo-500">
+            </div>
+        </div>
+
+        <!-- 365 Days Grid View -->
+        <div class="glass rounded-2xl p-4 sm:p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-gray-200 flex items-center space-x-2">
+                    <i class="fa-solid fa-list-check text-indigo-400"></i>
+                    <span>Savings Roadmap (Day 1 to 365)</span>
+                </h2>
+                <div class="text-xs text-gray-400">Tap checkbox to mark done</div>
+            </div>
+
+            <!-- Scrollable List / Grid Container -->
+            <div id="daysContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-1">
+                <!-- Days will be injected here via JavaScript -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-xs text-gray-500 border-t border-gray-800">
+        <p>365 Days Savings Challenge &bull; Secured with AES-256-GCM Encryption &bull; Zero-Redeploy GitHub Branch Sync</p>
+    </footer>
+
+    <!-- Total Breakdown Modal -->
+    <div id="totalModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl border border-gray-700 relative animate-in fade-in zoom-in duration-200">
+            <button onclick="closeTotalModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white mb-1 flex items-center space-x-2">
+                <i class="fa-solid fa-vault text-emerald-400"></i>
+                <span>Milestone Total Calculator</span>
+            </h3>
+            <p class="text-xs text-gray-400 mb-4">Check accumulated savings up to any specific day or date.</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Select Day Number (1 - 365)</label>
+                    <input type="number" id="calcDayInput" min="1" max="365" value="365" oninput="calculateTotalUpTo()" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="bg-gray-900/60 p-4 rounded-2xl border border-gray-800 space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">Target Date:</span>
+                        <span id="calcDateOutput" class="font-semibold text-gray-200">--</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">Days Included:</span>
+                        <span id="calcDaysCount" class="font-semibold text-indigo-400">--</span>
+                    </div>
+                    <div class="border-t border-gray-800 pt-2 flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-300">Accumulated Total:</span>
+                        <span id="calcTotalOutput" class="text-xl font-black text-emerald-400">₹0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeTotalModal()" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-gray-300 transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-card max-w-lg w-full p-6 rounded-3xl shadow-2xl border border-gray-700 relative">
+            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white mb-1 flex items-center space-x-2">
+                <i class="fa-solid fa-sliders text-indigo-400"></i>
+                <span>Challenge Configuration</span>
+            </h3>
+            <p class="text-xs text-gray-400 mb-4">Customize your start date and bank accounts for fund transfers.</p>
+
+            <form id="settingsForm" onsubmit="saveSettings(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Start Date (Day 1)</label>
+                    <input type="date" id="settingStartDate" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Source Bank / Account (Debit)</label>
+                        <input type="text" id="settingSourceBank" placeholder="e.g. HDFC Salary A/c" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Target Bank / Account (Deposit)</label>
+                        <input type="text" id="settingTargetBank" placeholder="e.g. PPF / Piggy Bank" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-800 pt-4">
+                    <label class="block text-xs font-medium text-indigo-400 mb-1">Military Level Encryption Passphrase</label>
+                    <p class="text-[11px] text-gray-400 mb-2">Used for AES-256-GCM encryption before saving to data.json.</p>
+                    <input type="password" id="settingPassphrase" placeholder="Enter secure secret passphrase" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-gray-300 transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 transition">Save & Apply</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GitHub Sync Modal -->
+    <div id="syncModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-card max-w-lg w-full p-6 rounded-3xl shadow-2xl border border-gray-700 relative">
+            <button onclick="closeSyncModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white mb-1 flex items-center space-x-2">
+                <i class="fa-brands fa-github text-violet-400"></i>
+                <span>GitHub REST API Sync</span>
+            </h3>
+            <p class="text-xs text-gray-400 mb-4">Push/Pull encrypted <code class="text-indigo-300">data.json</code> directly to a separate Git branch to avoid site redeploys.</p>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Repo Owner / Username</label>
+                        <input type="text" id="syncOwner" placeholder="e.g. johndoe" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Repo Name</label>
+                        <input type="text" id="syncRepo" placeholder="e.g. savings-365" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Data Branch Name</label>
+                        <input type="text" id="syncBranch" placeholder="e.g. data-branch" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Passphrase (AES-256-GCM)</label>
+                        <input type="password" id="syncPassphrase" placeholder="Encryption key" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">GitHub Personal Access Token (PAT)</label>
+                    <input type="password" id="syncToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-indigo-500">
+                    <p class="text-[11px] text-gray-500 mt-1">Needs `repo` or `contents` write scope.</p>
+                </div>
+
+                <div id="syncStatus" class="text-xs p-3 rounded-xl bg-gray-900 border border-gray-800 hidden"></div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button onclick="pullFromGitHub()" class="px-4 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs font-semibold text-gray-200 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-cloud-arrow-down text-blue-400"></i>
+                        <span>Pull from GitHub</span>
+                    </button>
+                    <button onclick="pushToGitHub()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-cloud-arrow-up text-white"></i>
+                        <span>Push Encrypted data.json</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Notification Box (Instead of alert) -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-sm w-full bg-gray-900 border border-gray-700 shadow-2xl rounded-2xl p-4 flex items-start space-x-3">
+        <div id="toastIcon" class="text-lg mt-0.5"></div>
+        <div class="flex-grow">
+            <h4 id="toastTitle" class="text-sm font-bold text-white">Notification</h4>
+            <p id="toastDesc" class="text-xs text-gray-300 mt-0.5"></p>
+        </div>
+        <button onclick="hideToast()" class="text-gray-500 hover:text-gray-300"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Application JavaScript -->
+    <script>
+        // State Management
+        let appState = {
+            startDate: new Date().toISOString().split('T')[0],
+            sourceBank: "HDFC Bank",
+            targetBank: "Piggy Bank / PPF",
+            completedDays: {}, // dayNumber -> boolean
+            syncConfig: {
+                owner: "",
+                repo: "",
+                branch: "data-branch",
+                token: ""
+            },
+            passphrase: "DefaultSecretPassphrase123!"
+        };
+
+        // Initialize App on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLocalState();
+            renderDashboard();
+            renderDaysList();
+            
+            // Check if first time setup required
+            if (!localStorage.getItem('savings_365_state')) {
+                openSettingsModal();
+            }
+        });
+
+        // Load state from localStorage
+        function loadLocalState() {
+            const saved = localStorage.getItem('savings_365_state');
+            if (saved) {
+                try {
+                    appState = JSON.parse(saved);
+                } catch(e) {
+                    console.error("Failed to parse local state", e);
+                }
+            }
+            // Populate settings fields
+            document.getElementById('settingStartDate').value = appState.startDate;
+            document.getElementById('settingSourceBank').value = appState.sourceBank;
+            document.getElementById('settingTargetBank').value = appState.targetBank;
+            document.getElementById('settingPassphrase').value = appState.passphrase;
+
+            // Populate sync fields
+            document.getElementById('syncOwner').value = appState.syncConfig.owner || '';
+            document.getElementById('syncRepo').value = appState.syncConfig.repo || '';
+            document.getElementById('syncBranch').value = appState.syncConfig.branch || 'data-branch';
+            document.getElementById('syncToken').value = appState.syncConfig.token || '';
+            document.getElementById('syncPassphrase').value = appState.passphrase || '';
+        }
+
+        // Save state to localStorage
+        function saveLocalState() {
+            localStorage.setItem('savings_365_state', JSON.stringify(appState));
+        }
+
+        // Calculate Date for Day N
+        function getDateForDay(dayNum) {
+            const start = new Date(appState.startDate);
+            if (isNaN(start.getTime())) return new Date().toISOString().split('T')[0];
+            const target = new Date(start);
+            target.setDate(start.getDate() + (dayNum - 1));
+            return target.toISOString().split('T')[0];
+        }
+
+        // Render Dashboard Stats
+        function renderDashboard() {
+            let totalSaved = 0;
+            let completedCount = 0;
+
+            for (let i = 1; i <= 365; i++) {
+                if (appState.completedDays[i]) {
+                    totalSaved += i;
+                    completedCount++;
+                }
+            }
+
+            document.getElementById('statSaved').innerText = '₹' + totalSaved.toLocaleString('en-IN');
+            document.getElementById('statDays').innerText = completedCount + ' / 365';
+            document.getElementById('statPercentage').innerText = ((completedCount / 365) * 100).toFixed(1) + '%';
+            document.getElementById('displaySourceBank').innerText = appState.sourceBank;
+            document.getElementById('displayTargetBank').innerText = appState.targetBank;
+            document.getElementById('displayStartDate').innerText = appState.startDate;
+
+            // Calculate current streak
+            let streak = 0;
+            for (let i = 1; i <= 365; i++) {
+                if (appState.completedDays[i]) streak++;
+                else break; // Or continuous streak logic
+            }
+            document.getElementById('currentStreakText').innerText = `Completed tally: ${completedCount} days`;
+        }
+
+        // Render Days Checklist
+        function renderDaysList() {
+            const container = document.getElementById('daysContainer');
+            const filter = document.getElementById('filterStatus').value;
+            const search = document.getElementById('searchDay').value.toLowerCase().trim();
+
+            let html = '';
+            let countShown = 0;
+
+            for (let i = 1; i <= 365; i++) {
+                const isCompleted = !!appState.completedDays[i];
+                const dateStr = getDateForDay(i);
+                const amount = i;
+
+                // Apply filter
+                if (filter === 'completed' && !isCompleted) continue;
+                if (filter === 'pending' && isCompleted) continue;
+
+                // Apply search
+                if (search && !i.toString().includes(search) && !dateStr.includes(search)) continue;
+
+                countShown++;
+
+                html += `
+                    <div onclick="toggleDay(${i})" class="glass-card p-3.5 rounded-2xl border transition hover:border-indigo-500/50 cursor-pointer flex items-center justify-between group ${isCompleted ? 'bg-emerald-950/20 border-emerald-500/30' : 'border-gray-800'}">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-xl ${isCompleted ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30' : 'bg-gray-800 text-gray-400 border border-gray-700'} flex items-center justify-center font-bold text-xs transition">
+                                ${i}
+                            </div>
+                            <div>
+                                <div class="text-xs font-semibold text-gray-200">Day ${i} &bull; <span class="text-emerald-400 font-bold">₹${amount}</span></div>
+                                <div class="text-[11px] text-gray-400 flex items-center space-x-1 mt-0.5">
+                                    <span>${dateStr}</span>
+                                    <span>&bull;</span>
+                                    <span class="truncate max-w-[120px] text-gray-400">${appState.sourceBank} → ${appState.targetBank}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <input type="checkbox" ${isCompleted ? 'checked' : ''} onclick="event.stopPropagation(); toggleDay(${i})" class="w-4 h-4 rounded accent-indigo-600 cursor-pointer">
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (countShown === 0) {
+                html = `<div class="col-span-full py-12 text-center text-gray-500 text-xs">No days found matching your filter or search criteria.</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Toggle Day Status
+        function toggleDay(dayNum) {
+            appState.completedDays[dayNum] = !appState.completedDays[dayNum];
+            if (!appState.completedDays[dayNum]) {
+                delete appState.completedDays[dayNum];
+            }
+            saveLocalState();
+            renderDashboard();
+            renderDaysList();
+        }
+
+        // Settings Modal Controls
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+        function saveSettings(e) {
+            e.preventDefault();
+            appState.startDate = document.getElementById('settingStartDate').value;
+            appState.sourceBank = document.getElementById('settingSourceBank').value;
+            appState.targetBank = document.getElementById('settingTargetBank').value;
+            appState.passphrase = document.getElementById('settingPassphrase').value;
+
+            saveLocalState();
+            closeSettingsModal();
+            renderDashboard();
+            renderDaysList();
+            showToast('Success', 'Settings & encryption passphrase updated successfully!', 'success');
+        }
+
+        // Total Modal Controls
+        function openTotalModal() {
+            document.getElementById('totalModal').classList.remove('hidden');
+            calculateTotalUpTo();
+        }
+        function closeTotalModal() {
+            document.getElementById('totalModal').classList.add('hidden');
+        }
+        function calculateTotalUpTo() {
+            const dayLimit = parseInt(document.getElementById('calcDayInput').value) || 365;
+            const validLimit = Math.max(1, Math.min(365, dayLimit));
+            
+            let sum = 0;
+            let completedCountInLimit = 0;
+            for (let i = 1; i <= validLimit; i++) {
+                sum += i;
+                if (appState.completedDays[i]) completedCountInLimit++;
+            }
+
+            document.getElementById('calcDateOutput').innerText = getDateForDay(validLimit);
+            document.getElementById('calcDaysCount').innerText = `${validLimit} Days (Completed: ${completedCountInLimit})`;
+            document.getElementById('calcTotalOutput').innerText = '₹' + sum.toLocaleString('en-IN');
+        }
+
+        // GitHub Sync Modal Controls
+        function openSyncModal() {
+            document.getElementById('syncModal').classList.remove('hidden');
+            // Sync values from state
+            document.getElementById('syncOwner').value = appState.syncConfig.owner || '';
+            document.getElementById('syncRepo').value = appState.syncConfig.repo || '';
+            document.getElementById('syncBranch').value = appState.syncConfig.branch || 'data-branch';
+            document.getElementById('syncToken').value = appState.syncConfig.token || '';
+            document.getElementById('syncPassphrase').value = appState.passphrase || '';
+        }
+        function closeSyncModal() {
+            document.getElementById('syncModal').classList.add('hidden');
+        }
+
+        // --- MILITARY LEVEL ENCRYPTION (AES-256-GCM via Web Crypto API) ---
+        async function getCryptoKey(passphrase, salt) {
+            const enc = new TextEncoder();
+            const keyMaterial = await window.crypto.subtle.importKey(
+                "raw",
+                enc.encode(passphrase),
+                { name: "PBKDF2" },
+                false,
+                ["deriveKey"]
+            );
+            return window.crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: salt,
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                keyMaterial,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["encrypt", "decrypt"]
+            );
+        }
+
+        async function encryptData(plainText, passphrase) {
+            const enc = new TextEncoder();
+            const salt = window.crypto.getRandomValues(new Uint8Array(16));
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const key = await getCryptoKey(passphrase, salt);
+
+            const encrypted = await window.crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                enc.encode(plainText)
+            );
+
+            // Combine salt + iv + encrypted payload into a single buffer and convert to base64
+            const combined = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
+            combined.set(salt, 0);
+            combined.set(iv, salt.byteLength);
+            combined.set(new Uint8Array(encrypted), salt.byteLength + iv.byteLength);
+
+            let binary = '';
+            const len = combined.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(combined[i]);
+            }
+            return btoa(binary);
+        }
+
+        async function decryptData(base64Str, passphrase) {
+            try {
+                const binary = atob(base64Str);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+
+                const salt = bytes.slice(0, 16);
+                const iv = bytes.slice(16, 28);
+                const encrypted = bytes.slice(28);
+
+                const key = await getCryptoKey(passphrase, salt);
+                const decrypted = await window.crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    encrypted
+                );
+
+                const dec = new TextDecoder();
+                return dec.decode(decrypted);
+            } catch (e) {
+                throw new Error("Decryption failed. Invalid passphrase or corrupted data.");
+            }
+        }
+
+        // --- GITHUB REST API SYNC ---
+        async function pushToGitHub() {
+            const owner = document.getElementById('syncOwner').value.trim();
+            const repo = document.getElementById('syncRepo').value.trim();
+            const branch = document.getElementById('syncBranch').value.trim() || 'data-branch';
+            const token = document.getElementById('syncToken').value.trim();
+            const passphrase = document.getElementById('syncPassphrase').value.trim();
+
+            if (!owner || !repo || !token || !passphrase) {
+                showSyncStatus("Please fill in all GitHub sync fields & encryption passphrase.", "error");
+                return;
+            }
+
+            // Update sync config in appState
+            appState.syncConfig = { owner, repo, branch, token };
+            appState.passphrase = passphrase;
+            saveLocalState();
+
+            showSyncStatus("Encrypting data and connecting to GitHub...", "info");
+
+            try {
+                // 1. Prepare JSON payload and encrypt
+                const plainJson = JSON.stringify(appState, null, 2);
+                const encryptedBase64 = await encryptData(plainJson, passphrase);
+                
+                // Wrap in structured format for data.json
+                const fileObj = {
+                    version: "1.0",
+                    algorithm: "AES-256-GCM",
+                    updatedAt: new Date().toISOString(),
+                    payload: encryptedBase64
+                };
+                const fileContentBase64 = btoa(JSON.stringify(fileObj, null, 2));
+
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/data.json`;
+                const headers = {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/vnd.github+json",
+                    "Content-Type": "application/json"
+                };
+
+                // 2. Check if file already exists to get SHA
+                let fileSha = null;
+                const getResp = await fetch(`${apiUrl}?ref=${branch}`, { headers });
+                if (getResp.ok) {
+                    const fileData = await getResp.json();
+                    fileSha = fileData.sha;
+                }
+
+                // 3. Create or update file on target branch
+                const bodyData = {
+                    message: `Update encrypted savings data.json [${new Date().toLocaleString()}]`,
+                    content: fileContentBase64,
+                    branch: branch
+                };
+                if (fileSha) bodyData.sha = fileSha;
+
+                const putResp = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify(bodyData)
+                });
+
+                if (putResp.ok) {
+                    showSyncStatus(`Successfully pushed encrypted data.json to branch '${branch}' without redeploying main site!`, "success");
+                    showToast("Synced!", "Encrypted data successfully saved to GitHub branch.", "success");
+                } else {
+                    const errJson = await putResp.json();
+                    throw new Error(errJson.message || "GitHub API error");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showSyncStatus(`Sync Error: ${err.message}`, "error");
+            }
+        }
+
+        async function pullFromGitHub() {
+            const owner = document.getElementById('syncOwner').value.trim();
+            const repo = document.getElementById('syncRepo').value.trim();
+            const branch = document.getElementById('syncBranch').value.trim() || 'data-branch';
+            const token = document.getElementById('syncToken').value.trim();
+            const passphrase = document.getElementById('syncPassphrase').value.trim();
+
+            if (!owner || !repo || !token || !passphrase) {
+                showSyncStatus("Please fill in all GitHub sync fields & encryption passphrase.", "error");
+                return;
+            }
+
+            showSyncStatus("Pulling encrypted data.json from GitHub...", "info");
+
+            try {
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/data.json?ref=${branch}`;
+                const headers = {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/vnd.github+json"
+                };
+
+                const resp = await fetch(apiUrl, { headers });
+                if (!resp.ok) {
+                    throw new Error("File data.json not found on branch or invalid credentials.");
+                }
+
+                const fileJson = await resp.json();
+                const decodedContent = atob(fileJson.content.replace(/\s/g, ''));
+                const parsedFile = JSON.parse(decodedContent);
+
+                if (!parsedFile.payload) {
+                    throw new Error("Invalid data.json file structure.");
+                }
+
+                // Decrypt payload
+                const decryptedJsonStr = await decryptData(parsedFile.payload, passphrase);
+                const remoteState = JSON.parse(decryptedJsonStr);
+
+                // Update local appState
+                appState = remoteState;
+                appState.syncConfig = { owner, repo, branch, token };
+                appState.passphrase = passphrase;
+                saveLocalState();
+
+                loadLocalState();
+                renderDashboard();
+                renderDaysList();
+
+                showSyncStatus("Successfully pulled and decrypted data from GitHub!", "success");
+                showToast("Pulled!", "Savings data successfully loaded from GitHub.", "success");
+
+            } catch (err) {
+                console.error(err);
+                showSyncStatus(`Pull Error: ${err.message}`, "error");
+            }
+        }
+
+        function showSyncStatus(msg, type) {
+            const el = document.getElementById('syncStatus');
+            el.classList.remove('hidden');
+            el.className = `text-xs p-3 rounded-xl border ${type === 'success' ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300' : type === 'error' ? 'bg-rose-950/40 border-rose-500/30 text-rose-300' : 'bg-blue-950/40 border-blue-500/30 text-blue-300'}`;
+            el.innerText = msg;
+        }
+
+        // Custom Toast Notification System
+        function showToast(title, desc, type) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastDesc').innerText = desc;
+            document.getElementById('toastIcon').innerHTML = type === 'success' ? '<i class="fa-solid fa-circle-check text-emerald-400"></i>' : '<i class="fa-solid fa-circle-exclamation text-amber-400"></i>';
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                hideToast();
+            }, 4000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toastNotification');
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }
+    </script>
+</body>
+</html>
